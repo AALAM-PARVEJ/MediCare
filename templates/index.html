@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MediCare</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: url("https://images.unsplash.com/photo-1581594693701-6c97f6c3d20f") no-repeat center center fixed;
+      background-size: cover;
+      color: #000;
+    }
+
+    /* Top logo and slogan */
+    .header-text {
+      padding: 15px 30px;
+    }
+    .header-text h1 {
+      margin: 0;
+      font-style: italic;
+      font-size: 20px;
+    }
+    .header-text p {
+      margin: 0;
+      font-size: 14px;
+    }
+
+    /* Navbar */
+    nav {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+    }
+    nav a {
+      background: black;
+      color: white;
+      text-decoration: none;
+      padding: 8px 16px;
+      margin-left: 10px;
+      border-radius: 15px;
+      font-weight: bold;
+    }
+    nav a:hover {
+      background: #444;
+    }
+
+    /* Main content box */
+    .content-box {
+      background: rgba(255, 255, 255, 0.8);
+      padding: 30px;
+      margin: 80px auto;
+      width: 70%;
+      border-radius: 10px;
+    }
+    .content-box h2 {
+      font-size: 26px;
+      margin-bottom: 15px;
+    }
+    .content-box p {
+      font-size: 16px;
+      line-height: 1.6;
+      text-align: justify;
+    }
+
+    /* Get Started button */
+    .btn {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 12px 24px;
+      background: black;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+    .btn:hover {
+      background: #444;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Logo + slogan -->
+  <div class="header-text">
+    <h1>MediCARE</h1>
+    <p>Prediction is better than cure</p>
+  </div>
+
+  <!-- Navbar -->
+  <nav>
+    <a href="/">Home</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+    <a href="/signup">Signup</a>
+    <a href="/login">Signin</a>
+  </nav>
+
+  <!-- Content box -->
+  <div class="content-box">
+    <h2>BE YOUR OWN DOCTOR</h2>
+    <p>
+      It might have happened so many times that you or someone needs your doctor’s help immediately,
+      but they are not available due to some reasons. The disease prediction system is an end-user
+      support and online consultation project. Here, we propose a web application that allows users
+      to get instant guidance on their disease through an intelligent system. The application is fed
+      with various details and the disease associated with those details; the application allows
+      users to share their disease related issues. It then processes user specific details to check
+      for various illness that could be associated with it. Here we use some intelligent data mining
+      techniques to guess the most accurate illness that could be associated with patient’s details.
+      Based on result, patient can contact Doctor accordingly for further treatment.
+    </p>
+    <a class="btn" href="/signup">Get started</a>
+  </div>
+
+</body>
+</html>
