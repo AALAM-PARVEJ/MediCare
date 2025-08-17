@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Patient Profile - MediCare</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body {
+      background: url("{{ url_for('static', filename='bg.png') }}") no-repeat center center fixed;
+      background-size: cover;
+      font-family: Arial, sans-serif;
+    }
+
+    .profile-container {
+      width: 80%;
+      margin: 100px auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 40px;
+      border-radius: 15px;
+    }
+
+    .profile-left {
+      width: 40%;
+      text-align: center;
+    }
+    .profile-left img {
+      width: 120px;
+    }
+    .profile-left h3 {
+      margin: 15px 0;
+    }
+    .profile-left p {
+      font-size: 14px;
+      margin: 5px 0;
+    }
+
+    .profile-right {
+      width: 50%;
+      text-align: center;
+    }
+    .profile-right h2 {
+      margin-bottom: 20px;
+    }
+    .profile-right button {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      margin: 15px 0;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(to right, #3498db, #6dd5fa);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .profile-right button:hover {
+      background: linear-gradient(to right, #2980b9, #3498db);
+    }
+
+    .logout-btn {
+      background: red !important;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Logo + slogan -->
+  <div class="header-text">
+    <h1>MediCARE</h1>
+    <p>Prediction is better than cure</p>
+  </div>
+
+  <!-- Navbar -->
+  <nav>
+    <a href="/">Home</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+    <a href="/login" class="active">Log Out</a>
+  </nav>
+
+  <!-- Profile Container -->
+  <div class="profile-container">
+    <!-- Left side (Patient info) -->
+    <div class="profile-left">
+      <img src="{{ url_for('static', filename='patient.jpg') }}" alt="Patient Icon">
+      <!-- <h3>Patient</h3> -->
+      <p><b>Patient Name:</b> {{ full_name }}</p>
+      <p><b>Patient ID:</b> {{ patient_id }}</p>
+      <p><b>Email:</b> {{ email }}</p>
+    </div>
+
+    <!-- Right side (Options) -->
+    <div class="profile-right">
+      <h2>Patient Profile</h2>
+      <button onclick="location.href='/predict'">Check Disease</button>
+      <button onclick="location.href='/history'">View Consultation History</button>
+      <button onclick="location.href='/feedback'">Feedback</button>
+      <button class="logout-btn" onclick="location.href='/logout'">Log out</button>
+    </div>
+  </div>
+
+</body>
+</html>
