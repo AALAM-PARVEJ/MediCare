@@ -3,3 +3,5 @@ flask
 joblib
 numpy
 scikit-learn
+wikipedia
+wikipedia

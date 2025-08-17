@@ -8,8 +8,6 @@ Purpose: Symptom-based disease prediction with user profiles.
 
 from flask import Flask, render_template, request, redirect, url_for, session
 import joblib, sqlite3, numpy as np, random
-import joblib
-import numpy as np
 import wikipedia
 
 # Load your trained model
