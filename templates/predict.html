@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>Disease Prediction</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <style>
@@ -14,11 +13,10 @@
     }
     .container {
       max-width: 1000px;
-      margin: auto;
+      margin: 40px auto;
       background: rgba(255, 255, 255, 0.92);
       padding: 25px;
       border-radius: 12px;
-      margin-top: 40px;
       box-shadow: 0 0 20px rgba(0,0,0,0.3);
     }
     h2 {
@@ -44,6 +42,13 @@
       display: none;
       padding: 10px;
     }
+    .search-box {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      border: 1px solid #aaa;
+    }
     .symptom-list {
       max-height: 200px;
       overflow-y: auto;
@@ -52,18 +57,17 @@
       background: #fff;
     }
     .symptom-item {
+      display: flex;
+      justify-content: space-between; /* Text left, checkbox right */
+      align-items: center;            /* Vertically align */
       margin-bottom: 6px;
     }
-    .search-box {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 10px;
-      border-radius: 6px;
-      border: 1px solid #aaa;
+    .symptom-item input[type="checkbox"] {
+      margin: 0; /* Remove default spacing */
     }
     button {
       display: block;
-      margin: auto;
+      margin: 20px auto 0 auto;
       background: #28a745;
       color: white;
       padding: 10px 18px;
@@ -74,6 +78,28 @@
     }
     button:hover {
       background: #218838;
+    }
+    .selected-box {
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid #007BFF;
+      border-radius: 10px;
+      background: #e9f5ff;
+      min-height: 50px;
+    }
+    .selected-box h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      color: #007BFF;
+    }
+    .selected-symptom {
+      display: inline-block;
+      background: #007BFF;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 6px;
+      margin: 3px 3px 0 0;
+      font-size: 14px;
     }
   </style>
 </head>
@@ -92,10 +118,8 @@
           <div class="symptom-list">
             {% for symptom in symptoms %}
             <div class="symptom-item">
-              <label>
-                <input type="checkbox" name="symptoms" value="{{ symptom }}">
-                {{ symptom.replace('_', ' ').title() }}
-              </label>
+              <span>{{ symptom.replace('_', ' ').title() }}</span>
+              <input type="checkbox" name="symptoms" value="{{ symptom }}">
             </div>
             {% endfor %}
           </div>
@@ -105,13 +129,26 @@
 
       <button type="submit">Predict Disease</button>
     </form>
+
+    <!-- Selected Symptoms Box -->
+    <div class="selected-box">
+      <h3>Selected Symptoms:</h3>
+      <div id="selected-symptoms"></div>
+    </div>
   </div>
 
   <script>
     function toggleCategory(header) {
+      const allBodies = document.querySelectorAll('.category-body');
       const body = header.nextElementSibling;
+
+      allBodies.forEach(b => {
+        if (b !== body) b.style.display = 'none'; // Collapse others
+      });
+
       body.style.display = body.style.display === "block" ? "none" : "block";
     }
+
 
     function filterSymptoms(input) {
       const filter = input.value.toLowerCase();
@@ -121,6 +158,21 @@
         item.style.display = text.includes(filter) ? "" : "none";
       });
     }
+
+    // Dynamic display of selected symptoms
+    const selectedDiv = document.getElementById('selected-symptoms');
+
+    document.addEventListener('change', function(e) {
+      if(e.target.name === 'symptoms') {
+        selectedDiv.innerHTML = '';
+        document.querySelectorAll('input[name="symptoms"]:checked').forEach(c => {
+          const span = document.createElement('span');
+          span.className = 'selected-symptom';
+          span.innerText = c.value.replace('_',' ').replace(/\b\w/g, l => l.toUpperCase());
+          selectedDiv.appendChild(span);
+        });
+      }
+    });
   </script>
 </body>
 </html>

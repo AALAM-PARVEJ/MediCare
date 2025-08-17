@@ -8,7 +8,7 @@ Purpose: Symptom-based disease prediction with user profiles.
 
 from flask import Flask, render_template, request, redirect, url_for, session
 import joblib, sqlite3, numpy as np, random, wikipedia, secrets
-from datetime import datetime
+from datetime import datetime, timedelta
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import smtplib
@@ -95,51 +95,69 @@ def prettify(symptom):
 
 # ---------------- SYMPTOM CATEGORIES -----------------
 symptom_categories = {
-    "General & Constitutional": ["Fatigue", "Weight Gain", "Weight Loss", "Restlessness", "Lethargy",
-                                 "Malaise", "Obesity", "Excessive Hunger", "Increased Appetite",
-                                 "Sweating", "Chills", "Shivering", "High Fever", "Mild Fever",
-                                 "Toxic Look (Typhos)"],
-    "Head, Brain & Neurological": ["Headache", "Dizziness", "Loss Of Balance", "Unsteadiness",
-                                   "Weakness Of One Body Side", "Altered Sensorium", "Coma",
-                                   "Irritability", "Depression", "Anxiety", "Mood Swings",
-                                   "Lack Of Concentration", "Slurred Speech", "Spinning Movements",
-                                   "Memory Loss"],
-    "Eye Related": ["Pain Behind The Eyes", "Blurred And Distorted Vision",
-                    "Visual Disturbances", "Redness Of Eyes", "Watering From Eyes",
-                    "Yellowing Of Eyes", "Sunken Eyes"],
-    "Ear, Nose & Throat": ["Continuous Sneezing", "Patchy Throat", "Throat Irritation",
-                           "Runny Nose", "Congestion", "Sinus Pressure", "Loss Of Smell",
-                           "Drying And Tingling Lips", "Red Sore Around Nose"],
-    "Respiratory & Chest": ["Cough", "Phlegm", "Mucoid Sputum", "Rusty Sputum", "Blood In Sputum",
-                            "Breathlessness", "Chest Pain", "Palpitations", "Fast Heart Rate",
-                            "Wheezing"],
-    "Digestive & Abdominal": ["Stomach Pain", "Acidity", "Indigestion", "Nausea", "Vomiting",
-                              "Loss Of Appetite", "Abdominal Pain", "Diarrhoea", "Constipation",
-                              "Belly Pain", "Distention Of Abdomen", "Stomach Bleeding",
-                              "Fluid Overload", "Passage Of Gases", "Swelling Of Stomach"],
-    "Liver & Urinary": ["Dark Urine", "Yellow Urine", "Acute Liver Failure", "Dehydration",
-                        "Burning Micturition", "Spotting Urination", "Frequent Urination",
-                        "Bladder Discomfort", "Foul Smell Of Urine",
-                        "Continuous Feel Of Urine", "Polyuria", "Painful Urination",
-                        "Blood In Urine"],
-    "Skin, Hair & Nails": ["Itching", "Skin Rash", "Nodal Skin Eruptions", "Internal Itching",
-                           "Dischromic Patches", "Pus Filled Pimples", "Blackheads", "Scurring",
-                           "Skin Peeling", "Silver Like Dusting", "Small Dents In Nails",
-                           "Inflammatory Nails", "Blister", "Yellow Crust Ooze",
-                           "Ulcers On Tongue", "Bruising", "Brittle Nails", "Pale Skin"],
-    "Musculoskeletal & Joints": ["Joint Pain", "Knee Pain", "Hip Joint Pain", "Back Pain", "Neck Pain",
-                                 "Stiff Neck", "Cramps", "Muscle Weakness", "Muscle Wasting",
-                                 "Movement Stiffness", "Swelling Joints", "Swollen Legs",
-                                 "Swollen Blood Vessels", "Swollen Extremities", "Painful Walking",
-                                 "Bone Pain"],
-    "Reproductive & Endocrine": ["Abnormal Menstruation", "Enlarged Thyroid", "Irregular Sugar Level",
-                                 "Family History", "History Of Alcohol Consumption",
-                                 "Receiving Blood Transfusion", "Receiving Unsterile Injections",
-                                 "Extra Marital Contacts"],
-    "Lymphatic & Glandular": ["Swelled Lymph Nodes", "Swelling Of Glands", "Puffy Face And Eyes",
-                              "Prominent Veins On Calf"],
-    "Other Severe Indicators": ["Acute Liver Failure", "Stomach Bleeding", "Coma", "Altered Sensorium"]
+    "General & Constitutional": [
+        "fatigue","weight_gain","weight_loss","restlessness","lethargy",
+        "malaise","obesity","excessive_hunger","increased_appetite",
+        "sweating","chills","shivering","high_fever","mild_fever",
+        "toxic_look_(typhos)","anxiety","mood_swings","cold_hands_and_feets"
+    ],
+    "Head, Brain & Neurological": [
+        "headache","dizziness","loss_of_balance","unsteadiness",
+        "weakness_of_one_body_side","altered_sensorium","coma",
+        "irritability","depression","lack_of_concentration",
+        "slurred_speech","spinning_movements"
+    ],
+    "Eye Related": [
+        "pain_behind_the_eyes","blurred_and_distorted_vision",
+        "visual_disturbances","redness_of_eyes","watering_from_eyes",
+        "yellowing_of_eyes","sunken_eyes"
+    ],
+    "Ear, Nose & Throat": [
+        "continuous_sneezing","patches_in_throat","throat_irritation",
+        "runny_nose","congestion","sinus_pressure","loss_of_smell",
+        "drying_and_tingling_lips","red_sore_around_nose"
+    ],
+    "Respiratory & Chest": [
+        "cough","phlegm","mucoid_sputum","rusty_sputum","blood_in_sputum",
+        "breathlessness","chest_pain","palpitations","fast_heart_rate"
+    ],
+    "Digestive & Abdominal": [
+        "stomach_pain","acidity","indigestion","nausea","vomiting",
+        "loss_of_appetite","abdominal_pain","diarrhoea","constipation",
+        "belly_pain","distention_of_abdomen","stomach_bleeding",
+        "fluid_overload","passage_of_gases","pain_during_bowel_movements",
+        "pain_in_anal_region","bloody_stool","irritation_in_anus"
+    ],
+    "Liver & Urinary": [
+        "dark_urine","yellow_urine","acute_liver_failure","dehydration",
+        "burning_micturition","spotting_urination","frequent_urination",
+        "bladder_discomfort","foul_smell_of_urine",
+        "continuous_feel_of_urine","polyuria","painful_urination"
+    ],
+    "Skin, Hair & Nails": [
+        "itching","skin_rash","nodal_skin_eruptions","internal_itching",
+        "dischromic_patches","pus_filled_pimples","blackheads","scurring",
+        "skin_peeling","silver_like_dusting","small_dents_in_nails",
+        "inflammatory_nails","blister","yellow_crust_ooze","ulcers_on_tongue",
+        "bruising","brittle_nails"
+    ],
+    "Musculoskeletal & Joints": [
+        "joint_pain","knee_pain","hip_joint_pain","back_pain","neck_pain",
+        "stiff_neck","cramps","muscle_weakness","muscle_wasting",
+        "movement_stiffness","swelling_joints","swollen_legs",
+        "swollen_blood_vessels","swollen_extremeties","painful_walking"
+    ],
+    "Reproductive & Endocrine": [
+        "abnormal_menstruation","enlarged_thyroid","irregular_sugar_level",
+        "family_history","history_of_alcohol_consumption",
+        "receiving_blood_transfusion","receiving_unsterile_injections",
+        "extra_marital_contacts"
+    ],
+    "Other Severe Indicators": [
+        "red_spots_over_body","muscle_pain"
+    ]
 }
+
 
 # ---------------- ROUTES -----------------
 @app.route("/")
@@ -278,19 +296,41 @@ def logout():
 def predict():
     if "user" not in session:
         return redirect(url_for("login"))
+
+    # Map user-friendly names to model features
+    symptom_map = {prettify(f): f for f in feature_names}
+
     if request.method=="POST":
-        selected=request.form.getlist("symptoms")
-        session["selected_symptoms"]=selected
+        selected = request.form.getlist("symptoms")
+        # Convert selected to actual model feature names
+        session["selected_symptoms"] = [symptom_map.get(s, s) for s in selected]
         return redirect(url_for("result"))
-    return render_template("predict.html", symptom_categories=symptom_categories,
-                           selected=session.get("selected_symptoms",[]))
+
+    # Show all symptoms in each category
+    display_categories = {}
+    used_symptoms = set()  # To track which symptoms are already categorized
+
+    for cat, syms in symptom_categories.items():
+        display_categories[cat] = []
+        for s in syms:
+            if s in feature_names:
+                display_categories[cat].append(s)
+                used_symptoms.add(s)
+
+
+
+    return render_template("predict.html",
+                           symptom_categories=display_categories,
+                           selected=[])
+
+
 
 @app.route("/result")
 def result():
     selected=session.get("selected_symptoms",[])
     if not selected:
         return redirect(url_for("predict"))
-    input_data=[1 if s in selected else 0 for s in feature_names]
+    input_data=[1 if f in selected else 0 for f in feature_names]
     disease, confidence=model_predict(input_data)
     if "user" in session:
         conn=sqlite3.connect("app.db")
@@ -350,14 +390,28 @@ def thank_you():
 def history():
     if "user" not in session:
         return redirect(url_for("login"))
-    patient_id=session["user"]
-    conn=sqlite3.connect("app.db")
-    conn.row_factory=sqlite3.Row
-    c=conn.cursor()
-    c.execute("SELECT ts,symptoms,disease,confidence FROM history WHERE patient_id=? ORDER BY ts DESC",(patient_id,))
-    history_data=c.fetchall()
+    patient_id = session["user"]
+    conn = sqlite3.connect("app.db")
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute("SELECT ts, symptoms, disease, confidence FROM history WHERE patient_id=? ORDER BY ts DESC", (patient_id,))
+    history_data = c.fetchall()
     conn.close()
-    return render_template("history.html", history=history_data)
+
+    # Convert timestamps to IST and format nicely
+    ist_history = []
+    for row in history_data:
+        ts_utc = datetime.strptime(row["ts"], "%Y-%m-%d %H:%M:%S")
+        ts_ist = ts_utc + timedelta(hours=5, minutes=30)  # UTC + 5:30 = IST
+        ist_history.append({
+            "ts": ts_ist.strftime("%d %b %Y, %I:%M %p"),
+            "symptoms": row["symptoms"],
+            "disease": row["disease"],
+            "confidence": row["confidence"]
+        })
+
+    return render_template("history.html", history=ist_history)
+
 
 @app.route("/admin")
 def admin_dashboard():

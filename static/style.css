@@ -174,3 +174,19 @@ tr:hover { background: #f1f1f1; }
     .content-box h2 { font-size: 22px; }
     nav a { padding: 6px 12px; font-size: 14px; }
 }
+
+
+.symptom-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;   /* vertically centers checkbox and text */
+    margin-bottom: 6px;    /* space between symptoms */
+    white-space: nowrap;  /* prevents text from wrapping */
+}
+
+
+
+.symptom-item input[type="checkbox"] {
+    margin: 0;
+}
+
