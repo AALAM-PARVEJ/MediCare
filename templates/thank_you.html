@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Thank You</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: url("{{ url_for('static', filename='bg.png') }}") no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 600px;
+      margin: 120px auto;
+      padding: 40px;
+      background: rgba(255, 255, 255, 0.92);
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+    }
+
+    h1 {
+      color: #28a745;
+      margin-bottom: 20px;
+    }
+
+    p {
+      font-size: 18px;
+      color: #333;
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 25px;
+      padding: 12px 20px;
+      background: #007BFF;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: background 0.3s ease;
+    }
+
+    a:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>✅ Thank You!</h1>
+    <p>Your valuable feedback has been recorded successfully.</p>
+    <a href="/profile">⬅ Back to Home</a>
+  </div>
+</body>
+</html>

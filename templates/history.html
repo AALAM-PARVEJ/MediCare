@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Consultation History</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body {
+      background: url("{{ url_for('static', filename='bg.png') }}") no-repeat center center fixed;
+      background-size: cover;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 900px;
+      margin: 60px auto;
+      padding: 30px;
+      background: rgba(255,255,255,0.95);
+      border-radius: 12px;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #007BFF;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ccc;
+    }
+
+    th {
+      background: #007BFF;
+      color: white;
+    }
+
+    tr:hover {
+      background: #f1f1f1;
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 15px;
+      background: #007BFF;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+    }
+
+    a:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🩺 Consultation History</h1>
+    {% if history %}
+      <table>
+        <tr>
+          <th>Date & Time</th>
+          <th>Selected Symptoms</th>
+          <th>Predicted Disease</th>
+        </tr>
+        {% for row in history %}
+        <tr>
+          <td>{{ row['Date'] }}</td>
+          <td>{{ row['Symptoms'] }}</td>
+          <td>{{ row['Predicted Disease'] }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    {% else %}
+      <p>No consultation history found.</p>
+    {% endif %}
+    <a href="/profile">⬅ Back to Home</a>
+  </div>
+</body>
+</html>

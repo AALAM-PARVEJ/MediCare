@@ -254,22 +254,82 @@ all_symptoms = feature_names  # from your trained model
 
 # Pre-define categories (subset of symptoms)
 symptom_categories = {
-    "Skin Related": [
-        "itching", "skin_rash", "nodal_skin_eruptions", "blister", 
-        "red_sore_around_nose", "yellow_crust_ooze", "acne", "scurring", "skin_peeling"
+    "General & Constitutional": [
+        "Fatigue", "Weight Gain", "Weight Loss", "Restlessness", "Lethargy",
+        "Malaise", "Obesity", "Excessive Hunger", "Increased Appetite", "Sweating",
+        "Chills", "Shivering", "High Fever", "Mild Fever", "Toxic Look (Typhos)"
     ],
-    "Stomach & Digestive": [
-        "stomach_pain", "acidity", "ulcers_on_tongue", "vomiting",
-        "abdominal_pain", "diarrhoea", "indigestion", "nausea", "constipation"
+
+    "Head, Brain & Neurological": [
+        "Headache", "Dizziness", "Loss Of Balance", "Unsteadiness",
+        "Weakness Of One Body Side", "Altered Sensorium", "Coma", "Irritability",
+        "Depression", "Anxiety", "Mood Swings", "Lack Of Concentration",
+        "Slurred Speech", "Spinning Movements", "Memory Loss"
     ],
-    "Respiratory": [
-        "cough", "high_fever", "breathlessness", "chest_pain",
-        "phlegm", "throat_irritation", "sinus_pressure", "runny_nose"
+
+    "Eye Related": [
+        "Pain Behind The Eyes", "Blurred And Distorted Vision", "Visual Disturbances",
+        "Redness Of Eyes", "Watering From Eyes", "Yellowing Of Eyes", "Sunken Eyes"
     ],
-    "Neurological & Mental": [
-        "headache", "dizziness", "loss_of_balance", "depression", "irritability", "altered_sensorium"
+
+    "Ear, Nose & Throat": [
+        "Continuous Sneezing", "Patchy Throat", "Throat Irritation",
+        "Runny Nose", "Congestion", "Sinus Pressure", "Loss Of Smell",
+        "Drying And Tingling Lips", "Red Sore Around Nose"
+    ],
+
+    "Respiratory & Chest": [
+        "Cough", "Phlegm", "Mucoid Sputum", "Rusty Sputum", "Blood In Sputum",
+        "Breathlessness", "Chest Pain", "Palpitations", "Fast Heart Rate", "Wheezing"
+    ],
+
+    "Digestive & Abdominal": [
+        "Stomach Pain", "Acidity", "Indigestion", "Nausea", "Vomiting",
+        "Loss Of Appetite", "Abdominal Pain", "Diarrhoea", "Constipation",
+        "Belly Pain", "Distention Of Abdomen", "Stomach Bleeding", "Fluid Overload",
+        "Passage Of Gases", "Swelling Of Stomach"
+    ],
+
+    "Liver & Urinary": [
+        "Dark Urine", "Yellow Urine", "Acute Liver Failure", "Dehydration",
+        "Burning Micturition", "Spotting Urination", "Frequent Urination",
+        "Bladder Discomfort", "Foul Smell Of Urine", "Continuous Feel Of Urine",
+        "Polyuria", "Painful Urination", "Blood In Urine"
+    ],
+
+    "Skin, Hair & Nails": [
+        "Itching", "Skin Rash", "Nodal Skin Eruptions", "Internal Itching",
+        "Dischromic Patches", "Pus Filled Pimples", "Blackheads", "Scurring",
+        "Skin Peeling", "Silver Like Dusting", "Small Dents In Nails",
+        "Inflammatory Nails", "Blister", "Yellow Crust Ooze", "Ulcers On Tongue",
+        "Bruising", "Brittle Nails", "Pale Skin"
+    ],
+
+    "Musculoskeletal & Joints": [
+        "Joint Pain", "Knee Pain", "Hip Joint Pain", "Back Pain",
+        "Neck Pain", "Stiff Neck", "Cramps", "Muscle Weakness",
+        "Muscle Wasting", "Movement Stiffness", "Swelling Joints",
+        "Swollen Legs", "Swollen Blood Vessels", "Swollen Extremities",
+        "Painful Walking", "Bone Pain"
+    ],
+
+    "Reproductive & Endocrine": [
+        "Abnormal Menstruation", "Enlarged Thyroid", "Irregular Sugar Level",
+        "Family History", "History Of Alcohol Consumption",
+        "Receiving Blood Transfusion", "Receiving Unsterile Injections",
+        "Extra Marital Contacts"
+    ],
+
+    "Lymphatic & Glandular": [
+        "Swelled Lymph Nodes", "Swelling Of Glands", "Puffy Face And Eyes",
+        "Prominent Veins On Calf"
+    ],
+
+    "Other Severe Indicators": [
+        "Acute Liver Failure", "Stomach Bleeding", "Coma", "Altered Sensorium"
     ]
 }
+
 
 # Collect all already categorized
 categorized = set(sum(symptom_categories.values(), []))
@@ -283,21 +343,91 @@ symptom_categories = {
     cat: [prettify(s) for s in lst] for cat, lst in symptom_categories.items()
 }
 
-
 @app.route("/predict", methods=["GET", "POST"])
 def predict():
     disease = None
     confidence = None
-    if request.method == "POST":
-        selected = request.form.getlist("symptoms")
-        # Convert selection to model input
-        input_data = [1 if prettify(s) in selected else 0 for s in feature_names]
-        disease, confidence = model_predict(input_data)
+    wiki_summary = None
+    selected = []  # keep checked items on reload
 
-    return render_template("predict.html",
-                           symptom_categories=symptom_categories,
-                           disease=disease,
-                           confidence=confidence)
+    if request.method == "POST":
+        selected = request.form.getlist("symptoms")  # these are prettified names
+
+        # Build input vector in the original feature order
+        input_data = [1 if prettify(s) in selected else 0 for s in feature_names]
+
+        # Predict
+        disease, confidence = model_predict(input_data)
+        # Save to history table
+        if "user" in session:
+            conn = sqlite3.connect("app.db")
+            c = conn.cursor()
+            c.execute(
+                "INSERT INTO history (patient_id, symptoms, disease) VALUES (?, ?, ?)",
+                (session["user"], ", ".join(selected), disease)
+            )
+            conn.commit()
+            conn.close()
+        # Wikipedia summary (short + safe)
+        try:
+            # wikipedia expects plain title; many of your labels match page titles well
+            wiki_summary = wikipedia.summary(disease, sentences=3, auto_suggest=True, redirect=True)
+        except Exception:
+            wiki_summary = None  # fail silently; we’ll still show the link
+
+    return render_template(
+        "predict.html",
+        symptom_categories=symptom_categories,  # <- correct name
+        disease=disease,
+        confidence=round(confidence * 100, 2) if confidence is not None else None,
+        wiki=wiki_summary,
+        selected=selected,
+    )
+# ---------- Feedback ----------
+@app.route("/feedback", methods=["GET", "POST"])
+def feedback():
+    """
+    Feedback page:
+    - GET → show feedback form
+    - POST → save feedback in DB and thank the user
+    """
+    if "user" not in session:
+        return redirect(url_for("login"))
+
+    if request.method == "POST":
+        comment = request.form["comment"]
+        patient_id = session["user"]
+
+        conn = sqlite3.connect("app.db")
+        c = conn.cursor()
+        c.execute("INSERT INTO feedback (patient_id, comment) VALUES (?, ?)", (patient_id, comment))
+        conn.commit()
+        conn.close()
+
+        return render_template("thankyou.html", full_name=session.get("full_name", "User"))
+
+    return render_template("feedback.html")
+
+
+# ---------- Consultation History ----------
+@app.route("/history")
+def history():
+    """
+    Show consultation history for logged-in user.
+    """
+    if "user" not in session:
+        return redirect(url_for("login"))
+
+    patient_id = session["user"]
+    conn = sqlite3.connect("app.db")
+    c = conn.cursor()
+    c.execute("SELECT ts, symptoms, disease FROM history WHERE patient_id=? ORDER BY ts DESC", (patient_id,))
+    history_data = c.fetchall()
+    conn.close()
+
+    return render_template("history.html", history=history_data)
+
+
 
 
 # SECTION 6: Run Flask

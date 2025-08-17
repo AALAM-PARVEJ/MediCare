@@ -1,155 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Disease Prediction</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f8f9fa;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            width: 90%;
-            max-width: 1000px;
-            margin: 30px auto;
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            text-align: center;
-            color: #007BFF;
-        }
-        .search-box {
-            margin: 15px 0;
-            text-align: center;
-        }
-        .search-box input {
-            width: 60%;
-            padding: 10px;
-            border: 2px solid #007BFF;
-            border-radius: 8px;
-            font-size: 16px;
-        }
-        .category {
-            margin: 20px 0;
-            padding: 15px;
-            background: #f1f1f1;
-            border-radius: 8px;
-        }
-        .category h2 {
-            margin-bottom: 10px;
-            color: #333;
-        }
-        .symptom-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 8px;
-        }
-        label {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        button {
-            margin-top: 20px;
-            width: 100%;
-            padding: 12px;
-            font-size: 18px;
-            background: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-        }
-        button:hover {
-            background: #0056b3;
-        }
-        .result {
-            margin-top: 20px;
-            text-align: center;
-            padding: 15px;
-            border-radius: 8px;
-            background: #e9f7ef;
-            color: #155724;
-            font-size: 20px;
-        }
-        .wiki {
-            margin-top: 20px;
-            padding: 15px;
-            background: #fefefe;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-        }
-        .wiki a {
-            color: #007BFF;
-            text-decoration: none;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Disease Prediction</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body {
+      background: url("{{ url_for('static', filename='bg.png') }}") no-repeat center center fixed;
+      background-size: cover;
+      font-family: Arial, sans-serif;
+    }
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      background: rgba(255, 255, 255, 0.92);
+      padding: 25px;
+      border-radius: 12px;
+      margin-top: 40px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+    .category {
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background: #fafafa;
+      overflow: hidden;
+    }
+    .category-header {
+      background: #007BFF;
+      color: white;
+      padding: 10px;
+      cursor: pointer;
+      font-size: 18px;
+    }
+    .category-body {
+      display: none;
+      padding: 10px;
+    }
+    .symptom-list {
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      padding: 10px;
+      background: #fff;
+    }
+    .symptom-item {
+      margin-bottom: 6px;
+    }
+    .search-box {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      border: 1px solid #aaa;
+    }
+    button {
+      display: block;
+      margin: auto;
+      background: #28a745;
+      color: white;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background: #218838;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Disease Prediction</h1>
+  <div class="container">
+    <h2>Disease Prediction</h2>
+    <form method="POST" action="{{ url_for('predict') }}">
 
-        <!-- 🔍 Search bar -->
-        <div class="search-box">
-            <input type="text" id="searchInput" placeholder="Search symptoms... (e.g. head, stomach)">
+      {% for category, symptoms in symptom_categories.items() %}
+      <div class="category">
+        <div class="category-header" onclick="toggleCategory(this)">
+          {{ category }}
         </div>
-
-        <form method="POST">
-            {% for category, syms in symptoms.items() %}
-            <div class="category">
-                <h2>{{ category }}</h2>
-                <div class="symptom-list">
-                    {% for sym in syms %}
-                    <label class="symptom-item">
-                        <input type="checkbox" name="symptoms" value="{{ sym }}"
-                               {% if sym in selected %} checked {% endif %}>
-                        {{ sym }}
-                    </label>
-                    {% endfor %}
-                </div>
+        <div class="category-body">
+          <input type="text" class="search-box" placeholder="Search {{ category }}..." onkeyup="filterSymptoms(this)">
+          <div class="symptom-list">
+            {% for symptom in symptoms %}
+            <div class="symptom-item">
+              <label>
+                <input type="checkbox" name="symptoms" value="{{ symptom }}">
+                {{ symptom.replace('_', ' ').title() }}
+              </label>
             </div>
             {% endfor %}
-
-            <button type="submit">Predict Disease</button>
-        </form>
-
-        {% if prediction %}
-        <div class="result">
-            <strong>Predicted Disease:</strong> {{ prediction }}
+          </div>
         </div>
-        {% if wiki %}
-        <div class="wiki">
-            <h3>About {{ prediction }}</h3>
-            <p>{{ wiki }}</p>
-            <p><a href="https://en.wikipedia.org/wiki/{{ prediction|replace(' ', '_') }}" target="_blank">
-                🔗 Read more on Wikipedia
-            </a></p>
-        </div>
-        {% endif %}
-        {% endif %}
-    </div>
+      </div>
+      {% endfor %}
 
-    <script>
-        // 🔎 Real-time search filter (keeps checked items)
-        document.getElementById("searchInput").addEventListener("keyup", function () {
-            let filter = this.value.toLowerCase();
-            let items = document.getElementsByClassName("symptom-item");
+      <button type="submit">Predict Disease</button>
+    </form>
+  </div>
 
-            for (let i = 0; i < items.length; i++) {
-                let label = items[i].innerText.toLowerCase();
-                let checkbox = items[i].querySelector("input[type='checkbox']");
-                if (label.includes(filter) || checkbox.checked) {
-                    items[i].style.display = "";
-                } else {
-                    items[i].style.display = "none";
-                }
-            }
-        });
-    </script>
+  <script>
+    function toggleCategory(header) {
+      const body = header.nextElementSibling;
+      body.style.display = body.style.display === "block" ? "none" : "block";
+    }
+
+    function filterSymptoms(input) {
+      const filter = input.value.toLowerCase();
+      const items = input.nextElementSibling.querySelectorAll(".symptom-item");
+      items.forEach(item => {
+        const text = item.innerText.toLowerCase();
+        item.style.display = text.includes(filter) ? "" : "none";
+      });
+    }
+  </script>
 </body>
 </html>
