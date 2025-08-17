@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Consultation History</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <style>
@@ -74,12 +76,14 @@
           <th>Date & Time</th>
           <th>Selected Symptoms</th>
           <th>Predicted Disease</th>
+          <th>Confidence Score</th>
         </tr>
         {% for row in history %}
         <tr>
-          <td>{{ row['Date'] }}</td>
-          <td>{{ row['Symptoms'] }}</td>
-          <td>{{ row['Predicted Disease'] }}</td>
+          <td>{{ row['ts'] }}</td>
+          <td>{{ row['symptoms'] }}</td>
+          <td>{{ row['disease'] }}</td>
+          <td>{{ "%.2f" | format(row['confidence'] * 100) }}%</td>
         </tr>
         {% endfor %}
       </table>

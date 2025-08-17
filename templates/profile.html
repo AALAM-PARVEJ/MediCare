@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Patient Profile - MediCare</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <style>
@@ -99,9 +101,28 @@
       <button onclick="location.href='/predict'">Check Disease</button>
       <button onclick="location.href='/history'">View Consultation History</button>
       <button onclick="location.href='/feedback'">Feedback</button>
-      <button class="logout-btn" onclick="location.href='/logout'">Log out</button>
+      <button class="logout-btn" onclick="location.href='/'">Log out</button>
     </div>
   </div>
+
+  {% if temp_password %}
+  <!-- Temporary Password Modal -->
+  <div id="tempPasswordModal" style="display:block; position:fixed; z-index:9999; background: rgba(0,0,0,0.5); top:0; left:0; width:100%; height:100%;">
+    <div style="margin:10% auto; padding:20px; width:300px; background:white; border-radius:10px; text-align:center;">
+      <h3>Change Temporary Password</h3>
+      {% if error %}<p style="color:red;">{{ error }}</p>{% endif %}
+      <form method="POST" action="{{ url_for('update_password') }}">
+        <input type="password" name="new_password" placeholder="New Password" required style="width:90%; margin:5px 0;"><br>
+        <input type="password" name="confirm_password" placeholder="Confirm Password" required style="width:90%; margin:5px 0;"><br>
+        <button type="submit" style="padding:5px 15px; margin-top:10px;">Update</button>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if message %}
+  <p style="color:green; text-align:center;">{{ message }}</p>
+  {% endif %}
 
 </body>
 </html>

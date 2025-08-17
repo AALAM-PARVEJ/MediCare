@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Feedback</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <style>
@@ -89,7 +91,8 @@
 <body>
   <div class="container">
     <h1>We Value Your Feedback</h1>
-    <form action="/submit_feedback" method="post">
+      <form action="{{ url_for('feedback') }}" method="POST">
+
       <label for="name">Your Name</label>
       <input type="text" id="name" name="name" placeholder="Enter your name" required>
 
@@ -97,9 +100,10 @@
       <input type="email" id="email" name="email" placeholder="Enter your email" required>
 
       <label for="message">Your Feedback</label>
-      <textarea id="message" name="message" placeholder="Write your feedback here..." required></textarea>
+      <textarea id="message" name="comment" placeholder="Write your feedback here..." required></textarea>
 
       <button type="submit">Submit Feedback</button>
+      
     </form>
 
     <a href="/" class="back-btn">⬅ Back to Home</a>

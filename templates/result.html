@@ -2,11 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Prediction Result</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <style>
     body {
-      background: url("{{ url_for('static', filename='bg.jpg') }}") no-repeat center center fixed;
+      background: url("{{ url_for('static', filename='bg.png') }}") no-repeat center center fixed;
       background-size: cover;
       font-family: Arial, sans-serif;
     }
@@ -50,16 +52,29 @@
 </head>
 <body>
   <div class="container">
-    <h2>Prediction Result</h2>
-    <div class="result-box">
-      <p><strong>Predicted Disease:</strong> {{ prediction }}</p>
-      <p><strong>Confidence Score:</strong> {{ confidence }}%</p>
-    </div>
-    <div class="result-box">
-      <h3>About {{ prediction }}</h3>
-      <p>{{ wiki_summary }}</p>
-    </div>
-    <a href="{{ url_for('profile') }}" class="back-btn">Back to Home</a>
+    <h2>Disease Prediction Result</h2>
+
+    <p><b>Predicted Disease:</b> {{ disease }}</p>
+    <p><b>Confidence:</b> {{ confidence }}%</p>
+
+    <h3>Selected Symptoms:</h3>
+    <ul>
+      {% for s in symptoms %}
+        <li>{{ s }}</li>
+      {% endfor %}
+    </ul>
+
+    {% if wiki %}
+      <h3>About {{ disease }}:</h3>
+      <p>{{ wiki }}</p>
+      <a href="https://en.wikipedia.org/wiki/{{ disease | replace(' ', '_') }}" target="_blank">
+        🔗 Read more on Wikipedia
+      </a>
+    {% endif %}
+
+    <br><br>
+    <a href="{{ url_for('profile') }}" class="btn">⬅ Back to Home</a>
+    <a href="{{ url_for('predict') }}" class="btn">Predict Another Disease</a>
   </div>
 </body>
 </html>

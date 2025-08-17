@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - MediCare</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: url("{{ url_for('static', filename='bg.png') }}") no-repeat center center fixed;
+      background-size: cover;
+      color: #000;
+    }
+
+    .header-text {
+      padding: 15px 30px;
+      background: rgba(255,255,255,0.7);
+    }
+    .header-text h1 { margin:0; font-style: italic; font-size: 24px; }
+    .header-text p { margin: 5px 0 0 0; font-size: 14px; }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      background: rgba(255,255,255,0.7);
+      padding: 10px 0;
+    }
+    nav a { text-decoration: none; color: #333; font-weight: bold; }
+    nav a:hover { color: #3498db; }
+
+    .container {
+      width: 90%;
+      max-width: 1200px;
+      margin: 30px auto;
+      background: rgba(255,255,255,0.85);
+      padding: 20px;
+      border-radius: 15px;
+      overflow-x: auto;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 600px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background: linear-gradient(to right, #3498db, #6dd5fa);
+      color: white;
+    }
+    tr:nth-child(even) { background-color: #f9f9f9; }
+
+    @media (max-width: 768px) {
+      .header-text h1 { font-size: 20px; }
+      .header-text p { font-size: 12px; }
+      nav { flex-direction: column; gap: 10px; }
+      table { font-size: 12px; }
+    }
+
+    .logout-btn {
+      display: inline-block;
+      margin-bottom: 15px;
+      padding: 8px 15px;
+      background: linear-gradient(to right, #e74c3c, #ff6b6b);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .logout-btn:hover { background: linear-gradient(to right, #c0392b, #e74c3c); }
+  </style>
+</head>
+<body>
+
+  <div class="header-text">
+    <h1>MediCARE</h1>
+    <p>Prediction is better than cure</p>
+  </div>
+
+  <nav>
+   
+    <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+  </nav>
+
+  <div class="container">
+    <h2>Patient Feedbacks</h2>
+    {% if feedbacks %}
+    <table>
+      <thead>
+        <tr>
+          <th>Patient ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Feedback</th>
+          <th>Timestamp</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for fb in feedbacks %}
+        <tr>
+          <td>{{ fb['patient_id'] }}</td>
+          <td>{{ fb['full_name'] }}</td>
+          <td>{{ fb['email'] }}</td>
+          <td>{{ fb['comment'] }}</td>
+          <td>{{ fb['ts'] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <p style="text-align:center; font-weight:bold;">No feedbacks yet.</p>
+    {% endif %}
+  </div>
+
+</body>
+</html>
